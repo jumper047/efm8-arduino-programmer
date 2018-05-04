@@ -30,4 +30,5 @@ Programming one target.
 py flash.py <serial-port> <firmware.hex>
 ```
 
-For the serial ports : E.g /dev/USB1 (Linux) or COM1 (Windows).
+Example for Linux: ```flash.py /dev/ttyACM0 RF_Brige.hex``` or ```sudo flash.py /dev/ttyACM0 RF_Brige.hex```
+Example for Windows: ```py flash.py COM8 RF_Bridge.hex```
