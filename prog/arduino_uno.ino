@@ -56,7 +56,7 @@ static unsigned char c2_read_bits (unsigned char len) {
   mask = 0x01 << (len-1);
   data = 0;
   //pinMode(C2D, INPUT);
-  DDRE &= ~(1<<C2D_PIN);
+  DDRD &= ~(1<<C2D_PIN);
   PINE &= (1<<C2D_PIN);
   for (i=0;i<len;i++) {
     c2_pulse_clk();
@@ -65,7 +65,7 @@ static unsigned char c2_read_bits (unsigned char len) {
       data = data | mask;
     }
   }
-  DDRE |= (1<<C2D_PIN);
+  DDRD |= (1<<C2D_PIN);
   //pinMode(C2D, OUTPUT);
 
   return data;
@@ -74,7 +74,7 @@ static unsigned char c2_read_bits (unsigned char len) {
 static void c2_send_bits (unsigned char data, unsigned char len) {
   unsigned char i;
   //pinMode(C2D, OUTPUT);
-  DDRE |= (1<<C2D_PIN);
+  DDRD |= (1<<C2D_PIN);
   for (i=0;i<len;i++) {
     if (data&0x01) {
       C2D_PORT |= (1<<C2D_PIN);
@@ -247,8 +247,8 @@ void c2_write_addr(unsigned char addr) {
 void setup() {
   Serial.begin(1000000);
   
-  DDRE |= (1<<C2D_PIN);
-  DDRE |= (1<<C2CK_PIN);
+  DDRD |= (1<<C2D_PIN);
+  DDRD |= (1<<C2CK_PIN);
   C2CK_PORT |= (1<<C2CK_PIN);
   
   digitalWrite(LED, LOW);
