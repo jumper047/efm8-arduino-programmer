@@ -61,7 +61,7 @@ static unsigned char c2_read_bits (unsigned char len) {
   for (i=0;i<len;i++) {
     c2_pulse_clk();
     data = data >> 1;
-    if (PINE & (1<<C2D_PIN)) {
+    if (PIND & (1<<C2D_PIN)) {
       data = data | mask;
     }
   }
