@@ -57,7 +57,7 @@ static unsigned char c2_read_bits (unsigned char len) {
   data = 0;
   //pinMode(C2D, INPUT);
   DDRD &= ~(1<<C2D_PIN);
-  PINE &= (1<<C2D_PIN);
+  PIND &= (1<<C2D_PIN);
   for (i=0;i<len;i++) {
     c2_pulse_clk();
     data = data >> 1;
