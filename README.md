@@ -30,5 +30,14 @@ Programming one target.
 py flash.py <serial-port> <firmware.hex>
 ```
 
-Example for Linux: ```flash.py /dev/ttyACM0 RF_Brige.hex``` or ```sudo flash.py /dev/ttyACM0 RF_Brige.hex```
+Example for Linux: 
+```flash.py /dev/ttyACM0 RF_Brige.hex```
+or 
+```sudo flash.py /dev/ttyACM0 RF_Brige.hex```
+
 Example for Windows: ```py flash.py COM8 RF_Bridge.hex```
+
+#Troubleshooting
+
+- If you get python errors make sure you're not running python3
+- Some modules need sudo on some systems
