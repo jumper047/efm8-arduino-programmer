@@ -29,7 +29,8 @@ pip install -r requirements.txt
 Programming one target.
 
 ```
-python flash.py <serial-port> <firmware.hex>
+python flash27.py <serial-port> <firmware.hex>
+python flash36.py <serial-port> <firmware.hex>
 ```
 
 Example for Linux: 
