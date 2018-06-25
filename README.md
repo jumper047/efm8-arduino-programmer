@@ -33,6 +33,11 @@ or
 
 Example for Windows: ```python flash27.py COM8 RF_Bridge.hex```
 
+## Windows standalone
+Unzip the ZIP archive flash27_EXE.zip.
+
+`flash27.exe com8 f:\test\RF_Bridge.hex`
+
 # Troubleshooting
 
 - Some modules need sudo on some systems
