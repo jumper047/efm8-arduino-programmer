@@ -11,8 +11,14 @@ For Test blinking blue Led [Blinky Led](https://github.com/christophe94700/efm8-
 # Software
 
 You need to have Python installed.  Then, install some required python modules.
+
 Use Python 2.7 and Pyserial for [flash27.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/flash27.py)
+Version Select a serial speed  [SeepdFlash27.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/SeepdFlash27.py)
+
 Use Python 3.6 and Pyserial for [flash36.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/flash36.py)
+Version Select a serial speed  [SeepdFlash36.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/SeepdFlash36.py)
+
+Version executable Windows standalone   [flash27_EXE.zip](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/ExeForWindows/flash27_EXE.zip))
 
 ```
 pip install -r requirements.txt
@@ -32,7 +38,8 @@ or
 ```sudo flash27.py /dev/ttyACM0 RF_Brige.hex```
 
 Example for Windows: ```python flash27.py COM8 RF_Bridge.hex```
-
+## Select a serial speed
+`python SeepdFlash27.py Com8 1000000 RF_Bridge.hex`
 ## Windows standalone
 Unzip the ZIP archive flash27_EXE.zip.
 
