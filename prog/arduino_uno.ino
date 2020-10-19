@@ -11,11 +11,11 @@
 
 // Digital pin 5 on uno
 #define C2D_PORT  PORTD
-#define C2D_PIN   5
+#define C2D_PIN   2
 
 // Digital pin 6 on uno
 #define C2CK_PORT   PORTD
-#define C2CK_PIN    6
+#define C2CK_PIN    3
 
 #define LED LED_BUILTIN 
 

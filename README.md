@@ -1,27 +1,16 @@
 # Setting up
 
-C2 is a 2-pin protocol.  Any arduino should work to implement the protocol via GPIO.  Just need to make sure that the correct pins are mapped for your Arduino.  Check the [firmware file Arduino Mega](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/prog/arduino_mega.ino#L11) or [firmware file Arduino Uno](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/prog/arduino_uno.ino#L11) and change the pins to map to your device if needed.  Currently, it is:
+C2 is a 2-pin protocol.  Any arduino should work to implement the protocol via GPIO.  Just need to make sure that the correct pins are mapped for your Arduino. Currently, it is:
 - for Arduino Mega and maps C2D and C2CK to digital pins 2 and 3, respectively.
 - for Arduino Uno and maps C2D and C2CK to digital pins 5 and 6, respectively.
 
 Program the firmware to the arduino and connect C2D, C2CK, and GND to your target device.
-# Firmware
-For RF Bridge [RF_Bridge](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/Firmware/RF_Bridge.hex)
-For Test blinking blue Led [Blinky Led](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/Firmware/Blinky_Led.hex)
 # Software
 
-You need to have Python installed.  Then, install some required python modules.
-
-Use Python 2.7 and Pyserial for [flash27.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/flash27.py)
-Version Select a serial speed  [SeepdFlash27.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/SeepdFlash27.py)
-
-Use Python 3.6 and Pyserial for [flash36.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/flash36.py)
-Version Select a serial speed  [SeepdFlash36.py](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/SeepdFlash36.py)
-
-Version executable Windows standalone   [flash27_EXE.zip](https://github.com/christophe94700/efm8-arduino-programmer/blob/master/ExeForWindows/flash27_EXE.zip))
+You need to have Python installed.  Then, install module pyserial.
 
 ```
-pip install -r requirements.txt
+pip install -r pyserial
 ```
 
 # Running
@@ -32,19 +21,11 @@ Programming one target.
 python flash.py <serial-port> <firmware.hex>
 ```
 
-Example for Linux: 
-```flash27.py /dev/ttyACM0 RF_Brige.hex```
-or 
-```sudo flash27.py /dev/ttyACM0 RF_Brige.hex```
+Dumping one target.
 
-Example for Windows: ```python flash27.py COM8 RF_Bridge.hex```
-## Select a serial speed
-`python SeepdFlash27.py Com8 1000000 RF_Bridge.hex`
-## Windows standalone
-Unzip the ZIP archive flash27_EXE.zip.
-
-`flash27.exe com8 f:\test\RF_Bridge.hex`
-
+```
+python read.py <serial-port> <firmware.hex>
+```
 # Troubleshooting
 
 - Some modules need sudo on some systems
