@@ -2,10 +2,6 @@
 import serial, sys, struct, time
 
 
-if len(sys.argv) != 3:
-	print ("usage: %s <port> <firmware.hex>" % sys.argv[0])
-	sys.exit(1)
-
 class PI():
 	def __init__(self, com):
 		self.ser = serial.Serial(com, 1000000, timeout = 1)
@@ -79,14 +75,15 @@ class PI():
 		# reset device
 		self.ser.write(b'\x02\x00')
 		assert self.ser.read(1)==b'\x82' 
-
-
-
 		print ("Device reset")
 
-print ("Once")
-port=sys.argv[1]
-firmware=open(sys.argv[2], 'r').read()
-programmers = PI(port)
+if __name__ == "__main__":
 
-programmers.prog(firmware)
+        if len(sys.argv) != 3:
+                print ("usage: %s <port> <firmware.hex>" % sys.argv[0])
+                sys.exit(1)
+        print ("Once")
+        port=sys.argv[1]
+        firmware=open(sys.argv[2], 'r').read()
+        programmers = PI(port)
+        programmers.prog(firmware)

@@ -2,13 +2,8 @@
 import serial, sys, struct, time, os.path
 
 
-if len(sys.argv) != 3:
-	print ("usage: %s <port> <firmware.hex>" % sys.argv[0])
-	sys.exit(1)
-	
-#if os.path.exists(sys.argv[2]):
-#	print ("file %s exists, sorry, I won't overwrite" % sys.argv[2])
-#	sys.exit(1)
+
+
 
 class PI():
 	def __init__(self, com):
@@ -59,8 +54,16 @@ class PI():
 
 	
 
-print ("Once")
-port=sys.argv[1]
-with open(sys.argv[2], 'x') as firmware:
-	programmers = PI(port)
-	programmers.dump(firmware)
+if __name__ == "__main__":
+        if len(sys.argv) != 3:
+	        print ("usage: %s <port> <firmware.hex>" % sys.argv[0])
+        	sys.exit(1)
+
+        # if os.path.exists(sys.argv[2]):
+        # 	print ("file %s exists, sorry, I won't overwrite" % sys.argv[2])
+        # 	sys.exit(1)
+        print ("Once")
+        port=sys.argv[1]
+        with open(sys.argv[2], 'x') as firmware:
+                programmers = PI(port)
+                programmers.dump(firmware)
