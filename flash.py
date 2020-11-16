@@ -59,7 +59,7 @@ class PI():
 			self.ser.write(data)
 			response = self.ser.read(1)
 			if response != b'\x83':
-				print('fuck')
+				print('bummer')
                                 return None
 		
 			
