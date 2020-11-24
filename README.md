@@ -1,16 +1,14 @@
 # Setting up
 
-C2 is a 2-pin protocol.  Any arduino should work to implement the protocol via GPIO.  Just need to make sure that the correct pins are mapped for your Arduino. Currently, it is:
-- for Arduino Mega and maps C2D and C2CK to digital pins 2 and 3, respectively.
-- for Arduino Uno and maps C2D and C2CK to digital pins 5 and 6, respectively.
+C2 is a 2-pin protocol.  Any arduino should work to implement the protocol via GPIO.  Just need to make sure that the correct pins are mapped for your Arduino. Currently, it  maps C2D and C2CK to digital pins 2 and 3, respectively.
+Flash the firmware to the arduino and connect C2D, C2CK, and GND to your target device.
 
-Program the firmware to the arduino and connect C2D, C2CK, and GND to your target device.
-# Software
+# Installing via pip
 
-You need to have Python installed.  Then, install module pyserial.
+You need to have Python installed.  Then run from project's folder
 
 ```
-pip install -r pyserial
+python -m pip install git+https://github.com/jumper047/efm8-arduino-programmer.git
 ```
 
 # Running
@@ -18,14 +16,26 @@ pip install -r pyserial
 Programming one target.
 
 ```
-python flash.py <serial-port> <firmware.hex>
+efm8_flash <serial-port> <firmware.hex>
 ```
 
 Dumping one target.
 
 ```
-python read.py <serial-port> <firmware.hex>
+efm8_read <serial-port> <firmware.hex>
 ```
+
+Flash arduino
+```
+efm8_arduino_flash <board> <serial-port>
+```
+For now supported only Arduino Nano boards: "nano_328p" for Nano with ATmega328p and "nano_168" for Nano with ATmega168
+
+Run gui
+```
+efm8_programmer
+```
+
 # Troubleshooting
 
 - Some modules need sudo on some systems
