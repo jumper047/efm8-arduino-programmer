@@ -13,80 +13,9 @@ import os
 from PyQt5.QtCore import pyqtSignal, QTimer
 from PyQt5.QtGui import QColor
 
-from flash import PI as flash_PI
-from read import PI as read_PI
-
-BIN_DIR = "bin"
-BOARDS = {"Arduino Nano (ATmega328P)":{"speed": 57600,
-                                       "mcu": "atmega328p",
-                                       "hex": "nano_ATmega328P.hex"},
-
-          "Arduino Nano (ATmega168)": {"speed": 19200,
-                                       "mcu": "atmega168",
-                                       "hex": "nano_ATmega168.hex"}}
-
-AVRDUDE_CONF = "avrdude.conf"
-AVRDUDE_BIN = {"win": {"32": "avrdude.exe",
-                       "64": "avrdude.exe"},
-               "linux": {"32": "avrdude",
-                         "64": "avrdude_x64"}}
-AVRDUDE_COMMAND = "{bin} -C{config} -v -p{mcu} -carduino -P{port} -b{speed} -D -Uflash:w:{hex}:i"
-
-# from https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python
-def list_serial_ports():
-    """ Lists serial port names
-
-        :raises EnvironmentError:
-            On unsupported or unknown platforms
-        :returns:
-            A list of the serial ports available on the system
-    """
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
-    else:
-        raise EnvironmentError('Unsupported platform')
-
-    result = []
-    for port in ports:
-        try:
-            s = serial.Serial(port)
-            s.close()
-            result.append(port)
-        except (OSError, serial.SerialException):
-            pass
-    return result
-
-
-def get_root_dir():
-    if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable)
-    else:
-        return os.path.curdir
-
-def get_avrdude_command(target, port):
-    """Returns list containing command and arguments, or None if platform not supported"""
-
-    params = dict()
-
-    arch = str(struct.calcsize("P") * 8)
-    if sys.platform.startswith('win'):
-        platform = 'win'
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        platform = 'linux'
-    else:
-        return None
-    params["bin"] = os.path.join(os.curdir, AVRDUDE_BIN[platform][arch])
-    params["config"] = AVRDUDE_CONF
-    params.update(BOARDS[target])
-    params["port"] = port
-
-    return AVRDUDE_COMMAND.format(**params)
-
+from efm8_arduino_programmer.efm8 import PI
+from efm8_arduino_programmer.arduino import BIN_DIR, BOARDS, get_avrdude_command
+from efm8_arduino_programmer.helpers import list_serial_ports, get_root_dir
 
 class StdoutProxy:
 
@@ -161,9 +90,11 @@ class FlasherWindow(QWidget):
 
         self.setup_ui()
         self.refresh_ports()
-
+ 
 
     def setup_ui(self):
+
+        self.setWindowTitle("EFM8 programmer")
 
         self.refresh_ports_button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         self.refresh_ports_button.setToolTip("Refresh ports list")
@@ -261,7 +192,7 @@ class FlasherWindow(QWidget):
         
         def run_efm_flashing():
             try:
-                programmers = flash_PI(port)
+                programmers = PI(port)
                 with open(firmware_path, 'r') as firmware:
                     programmers.prog(firmware.read())
             except Exception:
@@ -296,7 +227,7 @@ class FlasherWindow(QWidget):
          
         def run_efm_reading():
             try:
-                programmers = read_PI(port)
+                programmers = PI(port)
                 with open(save_path, 'x') as firmware:
                     programmers.dump(firmware)
             except Exception:
@@ -312,9 +243,3 @@ class FlasherWindow(QWidget):
 
         self.read_efm_thread = threading.Thread(target=run_efm_reading)
         self.read_efm_thread.start()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    flasher = FlasherWindow()
-    sys.exit(app.exec_())
