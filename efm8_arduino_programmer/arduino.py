@@ -1,18 +1,29 @@
-BIN_DIR = "bin"
-BOARDS = {"Arduino Nano (ATmega328P)":{"speed": 57600,
-                                       "mcu": "atmega328p",
-                                       "hex": "nano_ATmega328P.hex"},
+import os
+import struct
+import sys
 
-          "Arduino Nano (ATmega168)": {"speed": 19200,
-                                       "mcu": "atmega168",
-                                       "hex": "nano_ATmega168.hex"}}
+BIN_DIR = "bin"
+BOARDS = {
+    "Arduino Nano (ATmega328P)": {
+        "speed": 57600,
+        "mcu": "atmega328p",
+        "hex": "nano_ATmega328P.hex",
+    },
+    "Arduino Nano (ATmega168)": {
+        "speed": 19200,
+        "mcu": "atmega168",
+        "hex": "nano_ATmega168.hex",
+    },
+}
 
 AVRDUDE_CONF = "avrdude.conf"
-AVRDUDE_BIN = {"win": {"32": "avrdude.exe",
-                       "64": "avrdude.exe"},
-               "linux": {"32": "avrdude",
-                         "64": "avrdude_x64"}}
-AVRDUDE_COMMAND = "{bin} -C{config} -v -p{mcu} -carduino -P{port} -b{speed} -D -Uflash:w:{hex}:i"
+AVRDUDE_BIN = {
+    "win": {"32": "avrdude.exe", "64": "avrdude.exe"},
+    "linux": {"32": "avrdude", "64": "avrdude_x64"},
+}
+AVRDUDE_COMMAND = (
+    "{bin} -C{config} -v -p{mcu} -carduino -P{port} -b{speed} -D -Uflash:w:{hex}:i"
+)
 
 
 def get_avrdude_command(target, port):
@@ -21,10 +32,10 @@ def get_avrdude_command(target, port):
     params = dict()
 
     arch = str(struct.calcsize("P") * 8)
-    if sys.platform.startswith('win'):
-        platform = 'win'
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        platform = 'linux'
+    if sys.platform.startswith("win"):
+        platform = "win"
+    elif sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):
+        platform = "linux"
     else:
         return None
     params["bin"] = os.path.join(os.curdir, AVRDUDE_BIN[platform][arch])

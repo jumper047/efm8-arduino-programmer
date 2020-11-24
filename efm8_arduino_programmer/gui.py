@@ -1,24 +1,32 @@
-import io
 import sys
-import glob
-import struct
-import serial
-import shutil
 import subprocess
 import threading
 import traceback
 
-from PyQt5.QtWidgets import QApplication, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit, QPushButton, QSizePolicy, QTextEdit, QToolButton, QVBoxLayout, QWidget, QLabel, QInputDialog, QMessageBox, QFileDialog, QStyle
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QHBoxLayout,
+    QPushButton,
+    QSizePolicy,
+    QTextEdit,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QInputDialog,
+    QMessageBox,
+    QFileDialog,
+    QStyle,
+)
 import os
 from PyQt5.QtCore import pyqtSignal, QTimer
-from PyQt5.QtGui import QColor
 
 from efm8_arduino_programmer.efm8 import PI
 from efm8_arduino_programmer.arduino import BIN_DIR, BOARDS, get_avrdude_command
 from efm8_arduino_programmer.helpers import list_serial_ports, get_root_dir
 
-class StdoutProxy:
 
+class StdoutProxy:
     def __init__(self, wdgt):
         self.out = sys.stdout
         self.textwidget = wdgt
@@ -44,18 +52,18 @@ class StdoutProxy:
     def flush(self):
         self.out.flush()
 
-class StdOutWidget(QTextEdit):
 
+class StdOutWidget(QTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setReadOnly(True)
-        
-    
+
     def add_and_scroll(self, text):
         self.insertPlainText(text)
         vert_scroll = self.verticalScrollBar()
         if vert_scroll.isVisible():
             vert_scroll.setValue(vert_scroll.maximum())
+
 
 class FlasherWindow(QWidget):
 
@@ -90,13 +98,14 @@ class FlasherWindow(QWidget):
 
         self.setup_ui()
         self.refresh_ports()
- 
 
     def setup_ui(self):
 
         self.setWindowTitle("EFM8 programmer")
 
-        self.refresh_ports_button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+        self.refresh_ports_button.setIcon(
+            self.style().standardIcon(QStyle.SP_BrowserReload)
+        )
         self.refresh_ports_button.setToolTip("Refresh ports list")
 
         pblayout = QHBoxLayout()
@@ -106,14 +115,16 @@ class FlasherWindow(QWidget):
         pblayout.setStretchFactor(self.ports_combobox, 3)
 
         btnlayout = QHBoxLayout()
-        for b in [self.flash_arduino_button,
-                  self.flash_efm_button,
-                  self.read_efm_button]:
+        for b in [
+            self.flash_arduino_button,
+            self.flash_efm_button,
+            self.read_efm_button,
+        ]:
             s = b.sizePolicy()
             s.setHorizontalPolicy(QSizePolicy.Maximum)
             b.setSizePolicy(s)
             btnlayout.addWidget(b)
-        
+
         main_layout = QVBoxLayout()
         main_layout.addLayout(pblayout)
         main_layout.addLayout(btnlayout)
@@ -129,8 +140,7 @@ class FlasherWindow(QWidget):
         self.stdout_textedit.clear()
         port = self.ports_combobox.currentText()
         if len(port) == 0:
-            QMessageBox.warning(self, "Warning",
-                                "Com port not choosen")
+            QMessageBox.warning(self, "Warning", "Com port not choosen")
             return None
         self.read_efm_button.setEnabled(False)
         self.flash_efm_button.setEnabled(False)
@@ -141,28 +151,31 @@ class FlasherWindow(QWidget):
         self.read_efm_button.setEnabled(True)
         self.flash_efm_button.setEnabled(True)
         self.flash_arduino_button.setEnabled(True)
-        
 
     def flash_arduino(self):
         port = self.prepare_flashing()
         if port is None:
             return None
-            
-        board_type, flash = QInputDialog.getItem(self,
-                                                 "Flashing Arduino",
-                                                 "Choose board type:",
-                                                 BOARDS,
-                                                 editable=False)
+
+        board_type, flash = QInputDialog.getItem(
+            self, "Flashing Arduino", "Choose board type:", BOARDS, editable=False
+        )
         if not flash:
             return None
 
         cwd = os.path.join(get_root_dir(), BIN_DIR)
 
         def run_avrdude():
-            process = subprocess.Popen(get_avrdude_command(board_type, port), cwd=cwd, encoding='utf-8', stderr=subprocess.PIPE, shell=True)
+            process = subprocess.Popen(
+                get_avrdude_command(board_type, port),
+                cwd=cwd,
+                encoding="utf-8",
+                stderr=subprocess.PIPE,
+                shell=True,
+            )
             while True:
                 output = process.stderr.readline()
-                if output == '' and process.poll() is not None:
+                if output == "" and process.poll() is not None:
                     break
                 else:
                     self.new_message.emit(output)
@@ -178,22 +191,23 @@ class FlasherWindow(QWidget):
         self.read_efm_button.setEnabled(False)
         self.flash_efm_button.setEnabled(False)
         self.flash_arduino_button.setEnabled(False)
-        
 
     def flash_efm(self):
         port = self.prepare_flashing()
         if port is None:
             return None
 
-        firmware_path, flash = QFileDialog.getOpenFileName(self, "Open hex file", get_root_dir(), "Hex (*.hex)")
+        firmware_path, flash = QFileDialog.getOpenFileName(
+            self, "Open hex file", get_root_dir(), "Hex (*.hex)"
+        )
         if not flash or not os.path.exists(firmware_path):
             self.finalize_flashing()
             return None
-        
+
         def run_efm_flashing():
             try:
                 programmers = PI(port)
-                with open(firmware_path, 'r') as firmware:
+                with open(firmware_path, "r") as firmware:
                     programmers.prog(firmware.read())
             except Exception:
                 print("Exception occured:")
@@ -209,26 +223,28 @@ class FlasherWindow(QWidget):
         self.flash_efm_thread = threading.Thread(target=run_efm_flashing)
         self.flash_efm_thread.start()
 
-
     def read_efm(self):
         port = self.prepare_flashing()
         if port is None:
             return None
 
-        save_path, read = QFileDialog.getSaveFileName(self, "Save hex file",
-                                                      os.path.join(get_root_dir(), "firmware.hex"),
-                                                      "Hex (*.hex)")
+        save_path, read = QFileDialog.getSaveFileName(
+            self,
+            "Save hex file",
+            os.path.join(get_root_dir(), "firmware.hex"),
+            "Hex (*.hex)",
+        )
         if not read:
             self.finalize_flashing()
             return None
 
         if os.path.exists(save_path):
             os.remove(save_path)
-         
+
         def run_efm_reading():
             try:
                 programmers = PI(port)
-                with open(save_path, 'x') as firmware:
+                with open(save_path, "x") as firmware:
                     programmers.dump(firmware)
             except Exception:
                 print("Exception occured:")
