@@ -1,77 +1,83 @@
 import os
-import sys
-import site
+import re
+import shutil
+import subprocess
 
 from cx_Freeze import Executable, setup
 
-
-def get_qt_plugin_includes(plugin_list):
-    includes = []
-    for ppath in plugin_list:
-        includes.append(_get_include(ppath))
-        pass
-    return includes
-
-
-def _get_include(plugin_path):
-    foundPath = None
-
-    if sys.platform == "darwin":
-        packagesDirs = [c for c in sys.path if c.find("site-packages") != -1]
-    else:
-        # search site packages locations to see if we can find required .dll
-        packagesDirs = site.getsitepackages()
-        pass
-    for pdir in packagesDirs:
-        testPath = os.path.join(
-            pdir, os.path.join("PyQt5", "Qt", "plugins", plugin_path)
-        )
-        bname = os.path.basename(plugin_path)
-
-        # print("Checking for {} at {}".format(bname, testPath))
-        if os.path.exists(testPath):
-            foundPath = testPath
-            # print("DLL Found")
-            break
-        pass
-    if foundPath is None:
-        print(f"Error, could not find: {plugin_path}")
-        sys.exit(1)
-
-    return (foundPath, plugin_path)
-
-
 build_dir = "build"
-include_files = [("bin", "bin")]
 
-required_plugins = []
-if sys.platform == "win32":
-    # force the inclusion of certain plugins that cx-freeze cannot find on its own
-    required_plugins = ["styles/qwindowsvistastyle.dll"]
-
-if len(required_plugins) > 0:
-    include_files += get_qt_plugin_includes(plugin_list=required_plugins)
+shutil.rmtree(build_dir, ignore_errors=True)
 
 options = {
-    "build_exe": {
-        "build_exe": build_dir,
-        "include_files": include_files,
-        "include_msvcr": True,
-        "zip_include_packages": ["PyQt5"],
-        "packages": ["PyQt5.sip"],
+    'build_exe': {
+        # Including all modules from plugins except PyQt5
+        'build_exe':
+        build_dir,
+        'include_files': [
+            ("binaries", "binaries"),
+        ]
     }
 }
 
-base = None
-if sys.platform == "win32":
-    base = "Win32GUI"
+executables = [
+    Executable('efm8_programmer.py', base='Win32GUI')
+]
 
-executables = [Executable("gui_flasher.py", base=base)]
+re_unwanted_files = [
+    "Qt5?Bluetooth.*$", "Qt5?DBus.*$", "Qt5?Designer.*$", "Qt5?Help.*$",
+    "Qt5?Location.*$", "Qt5?Multimedia.*$", "Qt5?MultimediaWidgets.*$",
+    "Qt5?NetworkAuth.*$", "Qt5?Network.*$", "Qt5?Nfc.*$", "Qt5?Positioning.*$",
+    "Qt5?PrintSupport.*$", "Qt5?Qml.*$", "Qt5?Quick.*$", "Qt5?QuickWidgets.*$",
+    "Qt5?RemoteObjects.*$", "Qt5?Sensors.*$", "Qt5?SerialPort.*$",
+    "Qt5?Sql.*$", "Qt5?Svg.*$", "Qt5?WebChannel.*$", "Qt5?WebSockets.*$",
+    "Qt5?WinExtras.*$", "Qt5?XmlPatterns.*$", "Qt5?Xml.*$", ".*_de.qm",
+    ".*_gd.qm", ".*_ca.qm", ".*_fi.qm", ".*_cs.qm", ".*_da.qm", ".*_fr.qm",
+    ".*_bg.qm", ".*_es.qm", ".*_pl.qm", ".*_it.qm", ".*_hu.qm", ".*_ar.qm",
+    ".*_uk.qm", ".*_lv.qm", ".*_he.qm", ".*_ko.qm", ".*_ja.qm", ".*_sk.qm"
+]
 
-setup(
-    name="efm8-programmer",
-    version="1.0.0",
-    description="EFM8 Programmer",
-    options=options,
-    executables=executables,
-)
+unwanted_dirs = ["lib/PyQt5/Qt/qml"]
+
+unwanted_files_dirs = [
+    ("lib/PyQt5/",
+     ["Qt5Charts.dll", "Qt5Core.dll", "Qt5Gui.dll", "Qt5Widgets.dll"])
+]
+
+plugin_dirs = ["lib/PyQt5/Qt/plugins/platforms", "lib/PyQt5/Qt/plugins/styles"]
+
+setup(name='EFM8 Programmer',
+      version='1.0',
+      description='GUI for EFM8 programmer',
+      options=options,
+      executables=executables)
+
+files = set()
+
+for dirpath, dirnames, filenames in os.walk(build_dir):
+    for filename in filenames:
+        for entity in re_unwanted_files:
+            if re.match(entity, filename):
+                files.add(os.path.join(dirpath, filename))
+
+    for dirpath, filenames in unwanted_files_dirs:
+        for filename in filenames:
+            files.add(os.path.join(build_dir, dirpath, filename))
+
+for f in files:
+    try:
+        os.remove(f)
+        print("removing file {0}".format(f))
+    except Exception as e:
+        print("Error occured - {0}".format(e))
+
+for d in unwanted_dirs:
+    try:
+        shutil.rmtree(os.path.join(build_dir, d))
+        print("removing dir {0}".format(d))
+    except Exception as e:
+        print("Error occured - {0}".format(e))
+
+for d in plugin_dirs:
+    shutil.copytree(os.path.join(build_dir, d),
+                    os.path.join(build_dir, os.path.basename(d)))
